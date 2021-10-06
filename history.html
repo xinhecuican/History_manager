@@ -1,0 +1,67 @@
+<html>
+  <head>
+    <title>History</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+  </head>
+
+  <body>
+    <div id="aside">
+      <div id="cldFrame">
+        <div id="cldBody">
+          <table>
+            <thead>
+              <tr>
+                <td colspan="7">
+                  <div id="top">
+                    <span id="left">&lt;</span>
+                    <span id="topDate"></span>
+                    <span id="right">&gt;</span>
+                  </div>
+                </td>
+              </tr>
+              <tr id="week">
+                <td>日</td>
+                <td>一</td>
+                <td>二</td>
+                <td>三</td>
+                <td>四</td>
+                <td>五</td>
+                <td>六</td>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+	<div id="post">
+	  <input
+        id="searchInput"
+        type="text"
+        name="search"
+        placeholder="Search History"
+      />
+      <input type="submit" id="searchSubmit" value="Submit" />
+	  <div id="history_panel">
+	  </div>
+	</div>
+
+    <template id="historyTemplate">
+      <div class="history">
+        <div class="imageDiv">
+          <a class="titleLink"></a>
+        </div>
+        <div class="urlDiv">
+          <p class="pageName"></p>
+        </div>
+        <div class="removeDiv">
+          <a>
+            <button class="removeButton">Delete</button>
+            <input type="checkbox" class="removeCheck" />
+          </a>
+        </div>
+      </div>
+    </template>
+    <script src="logic.js"></script>
+  </body>
+</html>
