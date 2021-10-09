@@ -1,40 +1,4 @@
 
-let historyDiv = document.getElementById('history_panel');
-const kColors = ['#4688F1', '#E8453C', '#F9BB2D', '#3AA757'];
-let $ = document.getElementById.bind(document);
-var monthDay = [31,0,31,30,31,30,31,31,30,31,30,31];
-var now_date = new Date(new Date().setHours(0, 0, 0, 0) + 24 * 60 * 60 * 1000 - 1);//当天23.59
-
-function create_
-
-function get_day_history()
-{
-	let before_date = now_date;
-	now_date = now_date.setDate(now_date.getDate() - 1);
-	query = {
-		text: '',
-		startTime: now_date.getTime(),
-		endTime: before_date.getTime
-	}
-	chrome.history.search(query, (results)=>{
-		let domain = ''
-		let count = 0;
-		for(let result of results)
-		{
-			let result_domain = result.url.split('/');
-			if(result_domain[2] != domain)
-			{
-
-			}
-		}
-	});
-}
-
-function init()
-{
-	now_date = new Date(new Date().setHours(0, 0, 0, 0) + 24 * 60 * 60 * 1000 - 1);
-}
-
 /*判断某年是否是闰年*/
 function isLeap(year) {
     if((year%4==0 && year%100!=0) || year%400==0){
