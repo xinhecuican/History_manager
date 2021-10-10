@@ -4,7 +4,7 @@ const kColors = ['#4688F1', '#E8453C', '#F9BB2D', '#3AA757'];
 var MIN_CACHE_SIZE = 150;
 var DAY = 24 * 60 * 60 * 1000;
 var monthDay = [31,0,31,30,31,30,31,31,30,31,30,31];
-var now_date = new Date(new Date().setHours(0, 0, 0, 0) + 24 * 60 * 60 * 1000 - 1);//当天23.59
+var now_date = new Date();
 var block_id = 0;
 var history_days = [];
 var cache_days = [];
@@ -50,50 +50,64 @@ class History_day
 	}
 }
 
-
-
 function create_day_block()
 {
 	let history_day = new History_day(block_id, now_date);
-	now_date = new Date(now_date.getTime() - DAY);
+	now_date = new Date(now_date.getTime());
 	block_id++;
-	history_days.push(history_day);
+	cache_days.push(history_day);
 	return history_day;
 }
 
-function get_day_history(callback)
+function add_data_to_cache(result)
 {
-	let end_time = now_date.getTime() + 1000 * 60;
-	now_date = new Date(now_date.getTime() - DAY);
+	let temp_date = result.lastVisitTime;
+	if(now_date.getTime() < temp_date)
+	{
+		return;
+	}
+	cache_sum++;
+	let domain = result.url.split('/')[2];
+	if( cache_days.length == 0 || !is_same_day(cache_days[cache_days-1].date, new Date(result.lastVisitTime)))//不在同一天
+	{
+		now_date = result;
+		let day_block = create_day_block();
+		let item = new History_item(domain);
+		item.push(result);
+		day_block.add_data(item);
+	}
+	else
+	{
+		let day = cache_days[cache_days.length-1];
+		let item = day.data[data.data.length-1];
+		if(item.domain == domain)
+		{
+			day.data[day.data.length-1].push(result);
+		}
+		else
+		{
+			let ans_item = new History_item(domain);
+			ans_item.push(result);
+			cache_days[cache_days.length-1].add_data(ans_item);
+		}
+	}
+}
+
+function get_history(callback)
+{
+	let end_time = now_date.getTime();
 	query = {
 		text: '',
-		startTime: now_date.getTime(),
-		endTime: end_time
+		endTime: end_time,
+		maxResults: MIN_CACHE_SIZE
 	};
 	chrome.history.search(query, (results)=>{
 		if(results.length != 0)
 		{
-			let day = create_day_block();
-			let domain = results[0].url.split('/')[2];
-			let item = new History_item(domain);
 			for(let result of results)
 			{
-				let result_domain = result.url.split('/');
-				if(result_domain[2] != domain)
-				{
-					domain = result_domain[2];
-					day.add_data(item);
-					item = new History_item(domain);
-					item.push(result);
-				}
-				else
-				{
-					item.push(result);
-				}
+				add_data_to_cache(result);
 			}
-			day.add_data(item);
-			cache_days.push(day);
-			cache_sum += day.data.length;
 		}
 		callback();
 	});
@@ -107,7 +121,7 @@ function load()
 	}
 	if(cache_sum < MIN_CACHE_SIZE)
 	{
-		get_day_history(load);
+		get_history(load);
 	}
 }
 
@@ -117,11 +131,16 @@ function init()
 	block_id = 0;
 	history_days = [];
 	historyDiv.innerHTML = '';
-	get_day_history(load);
 }
 
 document.addEventListener("DOMContentLoaded", function(){
 	init();
+	let latest_history = chrome.extension.getBackgroundPage().latest_history;
+	console.log(latest_history);
+	for(let i = latest_history.tail-1; i!=latest_history.head; i=(i - 1 + latest_history.limit) % latest_history.limit)	
+	{
+		add_data_to_cache(latest_history.list[i]);
+	}
 });
 
 window.addEventListener("scroll", ()=>{

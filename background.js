@@ -148,7 +148,8 @@ History_pool.prototype.pop = function()
 }
 
 var latest_history = new History_pool();
-latest_history.set_limit(10);
+latest_history.set_limit(150);
+
 
 function reset(results)
 {
@@ -169,7 +170,7 @@ function reset(results)
 	console.log(latest_history);
 }
 
-chrome.history.search({text:'', maxResults: 199}, reset);
+chrome.history.search({text:'', maxResults: 1500}, reset);
 
 chrome.history.onVisited.addListener(function(historyItem){
 	latest_history.push(historyItem.title, historyItem);
