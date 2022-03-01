@@ -3,50 +3,29 @@
     <title>History</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link rel="stylesheet" type="text/css" href="css/style.css" />
+	<link rel="stylesheet" type="text/css" href="css/DatePickerTheme.css"/>
+	<!-- <link rel="stylesheet" type="text/css" href="css/jquery-ui.min.css"/> -->
   </head>
   <body>
     <div id="aside">
       <div id="cldFrame">
-        <div id="cldBody">
-          <table>
-            <thead>
-              <tr>
-                <td colspan="7">
-                  <div id="top">
-                    <span id="left">&lt;</span>
-                    <span id="topDate"></span>
-                    <span id="right">&gt;</span>
-                  </div>
-                </td>
-              </tr>
-              <tr id="week">
-                <td>日</td>
-                <td>一</td>
-                <td>二</td>
-                <td>三</td>
-                <td>四</td>
-                <td>五</td>
-                <td>六</td>
-              </tr>
-            </thead>
-            <tbody id="tbody"></tbody>
-          </table>
-        </div>
       </div>
-    </div>
-	<div id="post">
-	  <input
-        id="searchInput"
-        type="text"
-        name="search"
-        placeholder="Search History"
-      />
-      <input type="submit" id="searchSubmit" value="Submit" />
-	  <div id="history_panel">
+	  <div id="search_panel">
+		<input
+        	id="searchInput"
+	        type="text"
+    	    name="search"
+        	placeholder="Search History"
+      	/>
+      	<input type="submit" id="searchSubmit" value="Submit" />
 	  </div>
+	</div>
+	<div id="post">
+	  <div id="history_panel">
 	</div>
 	<script src="js/helper.js"></script>
 	<script src="js/jquery-3.6.0.min.js"></script>
+	<script src="js/jquery-ui.min.js"></script>
 	<script src="js/history_div.js"></script>
 	<script src="js/logic.js"></script>
 	<script src="js/calander.js"></script>

@@ -1,8 +1,3 @@
-function History_items()
-{
-	this.domain = "";
-	this.list = [];
-}
 
 function History_pool()
 {
@@ -62,80 +57,35 @@ History_pool.prototype.tail_forward = function()
 	this.tail = (this.tail + 1) % this.limit;
 }
 
-History_pool.prototype.push = function(key, item)
+History_pool.prototype.push = function(item)
 {
-	if(!this.empty())
+	if(!this.full())
 	{
-		let tail = (this.tail - 1 + this.limit) % this.limit;
-		if(this.list[tail].domain == key)
-		{
-			this.list[tail].list.push(item);
-			return false;
-		}
-		else
-		{
-			let items = new History_items();
-			items.domain = key;
-			items.list.push(item);
-			if(this.full())
-			{
-				this.list[this.tail] = items;
-				this.pop();
-			}
-			else
-			{
-				this.list[this.tail] = items;
-			}
-			this.tail_forward();
-		}
-	}
-	else
-	{
-		let items = new History_items();
-		items.domain = key;
-		items.list.push(item);
-		this.list[this.tail] = items;
+		this.list.push(item);
 		this.tail_forward();
 	}
-	return true;
+	else
+	{
+		this.list.push(item);
+		this.head_forward();
+		this.tail_forward();
+	}
+	
 }
 
-History_pool.prototype.unshift = function(key, item)
+History_pool.prototype.unshift = function(item)
 {
 	let head = (this.head - 1) < 0 ? this.limit-1 : this.head-1;
-	if(!this.empty())
+	if(this.full())
 	{
-		if(this.list[this.head].domain == key)
-		{
-			this.list[this.head].list.push(item);
-			return false;
-		}
-		else
-		{
-			let items = new History_items();
-			items.domain = key;
-			items.list.push(item);
-			if(this.full())
-			{
-				this.list[head] = items;
-				this.tail = this.tail - 1 < 0 ? this.limit-1 : this.tail-1;
-			}
-			else
-			{
-				this.list[head] = items;
-			}
-			this.head = head;
-		}
+		this.list[head] = item;
+		this.tail = this.tail - 1 < 0 ? this.limit - 1 : this.tail - 1;
 	}
 	else
 	{
-		let items = new History_items();
-		items.domain = key;
-		items.list.push(item);
-		this.list[head] = items;
-		this.head = head;
+		this.list[head] = item;
 	}
-	return true;
+	this.head = head;
 }
 
 History_pool.prototype.pop = function()
@@ -148,36 +98,32 @@ History_pool.prototype.pop = function()
 }
 
 var latest_history = new History_pool();
-latest_history.set_limit(150);
+latest_history.set_limit(70);
 
 
 function reset(results)
 {
+	latest_history.head = 0;
+	latest_history.tail = 0;
+	latest_history.list.length = 0;
 	let count = 0;
 	for(let result of results)
 	{
-		let domain = result.title;
-		let ans = latest_history.unshift(domain, result);
-		if(ans)
-		{
-			count++;
-		}
+		let ans = latest_history.unshift(result);
+		count++;
 		if(count >= latest_history.limit)
 		{
 			break;
 		}
 	}
-	console.log(latest_history);
 }
 
-chrome.history.search({text:'', maxResults: 1500}, reset);
+chrome.history.search({text:'', maxResults: 1000}, reset);
 
 chrome.history.onVisited.addListener(function(historyItem){
-	latest_history.push(historyItem.title, historyItem);
-	console.log(latest_history);
+	latest_history.push(historyItem);
 });
 
 chrome.history.onVisitRemoved.addListener((result)=>{
-	chrome.history.search({text:'', maxResults: 199}, reset);
-})
-
+	chrome.history.search({text:'', maxResults: 1000}, reset);
+});

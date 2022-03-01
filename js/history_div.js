@@ -46,10 +46,11 @@ function create_day_div(day)
 	return dic;
 }
 
-function create_item_div(item, day, item)
+function create_item_div(list, day, item)
 {
 	let div = document.createElement('div');
-	div.id = "b" + day.id.toString() + "i" + sum.toString();
+	div.id = "b" + day.id.toString() + "i" + day.inhtml_sum.toString();
+	day.inhtml_sum++;
 	div.className = "panel_item";
 	let show_url = item.is_multi() ? item.domain : item.url;
 	let show_title = item.items[0].title;
@@ -63,18 +64,25 @@ function create_item_div(item, day, item)
 	}
 	if(show_url.length > 42)
 	{
+		let url_length = show_url.length;
 		show_url = show_url.substring(0,35) + "..." + show_url.substring(url_length - 4,url_length);
 	}
+	show_url = transformSpecialCharacter(show_url);
+	show_title = transformSpecialCharacter(show_title);
+
 	let time = new Date(item.items[0].lastVisitTime);
-	let inner_html = `<li>
-						<span class="panel_item_title" id="${"text" + div.id}" style="background-image: url(chrome://favicon/${item.url})>
-						  <a href="${item.url}">${show_title}</a>
+						// 	<span>
+						//   <img class="item_img" src="chrome://favicon/${item.url}"/>
+						// </span>
+	let inner_html = `
+						<span class="panel_item_time">${dateFormat("hh:mm:ss", time)}</span>
+						<span class="panel_item_title" id="${"text" + div.id}" style="background-image: url(chrome://favicon/${item.url});">
+						  <a title="${show_title}" href="${item.url}">${show_title}</a>
 						  <text class="panel_item_url">${show_url}</text>
 						</span>
-						<span class="panel_item_time">${dateFormat("hh:mm:ss", time)}</span>
-					  </li>`;
+					  `;
 	div.innerHTML = inner_html;
-	list.appendChild(div);
+	list.append(div);
 }
 
 function create_list_items_div(list, day, items)
@@ -88,19 +96,24 @@ function create_list_items_div(list, day, items)
 
 function print_to_html()
 {
-	if(cache_days.length != 0 && history_days.length != 0 
-	&& is_same_day(cache_days[0].date, history_days[history_days.length-1].date))
+	if(cache_days.length != 0 && history_days.length != 0)
 	{
-		history_days.data.push.apply(a, cache_days[0].data);
-		create_list_items_div($("b" + history_days[history_days.length-1].id + " .history_list"), history_days[history_days.length-1], cache_days.data);
-		cache_days.shift();
+		while(cache_days.length != 0 && is_same_day(cache_days[0].date, history_days[history_days.length-1].date))
+		{
+			for(let data of cache_days[0].data)
+			{
+				history_days[history_days.length-1].add_data(data);
+			}
+			create_list_items_div($("#b" + history_days[history_days.length-1].id + " .history_list"), history_days	[history_days.length-1], cache_days[0].data);
+			cache_days.shift();
+		}
 	}
 	for(let day of cache_days)
 	{
 		let list = create_day_div(day);
 		create_list_items_div(list, day, day.data);
 	}
-	history_days.push.apply(a, cache_days);
+	document.getElementById("aside").style.height = document.getElementById("post").offsetHeight;
 	cache_days.length = 0;
 	cache_sum = 0;
 }
