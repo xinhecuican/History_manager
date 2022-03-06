@@ -1,7 +1,8 @@
 
 var historyDiv = document.getElementById('history_panel');
 const kColors = ['#4688F1', '#E8453C', '#F9BB2D', '#3AA757'];
-var MIN_CACHE_SIZE = 150;
+var MIN_CACHE_SIZE = 100;
+var MAX_CACHE_SIZE = 500;
 var DAY = 24 * 60 * 60 * 1000;
 var monthDay = [31,0,31,30,31,30,31,31,30,31,30,31];
 var now_date = new Date(new Date().setHours(0, 0, 0, 0) + 24 * 60 * 60 * 1000 - 1);
@@ -9,8 +10,15 @@ var block_id = 0;
 var history_days = [];
 var cache_days = [];
 var cache_sum = 0;
+var pre_cache_days = [];
+var pre_cache_sum = 0;
+var cache_state = 0;
 var is_searching = false;
 var loadable = true;
+var history_panel = document.getElementById("history_panel");
+var post = document.getElementById("post");
+var aside = document.getElementById("aside");
+var same_times = 0;
 
 class History_item
 {
@@ -51,29 +59,62 @@ class History_day
 		history_item.id = this.data.length;
 		this.data.push(history_item);
 	}
+
+	cacheSum()
+	{
+		let ans = 0;
+		for(let ele of this.data)
+		{
+			ans += ele.items.length;
+		}
+		return ans;
+	}
 }
 
 function create_day_block()
 {
 	let history_day = new History_day(block_id, now_date);
 	block_id++;
-	cache_days.push(history_day);
+	if(!cache_state)
+		cache_days.push(history_day);
+	else
+	{
+		cache_state = 1;
+		pre_cache_days.push(history_day);
+	}
 	return history_day;
+}
+
+function decideState()
+{
+	if(cache_sum > MIN_CACHE_SIZE && cache_state == 0)
+	{
+		cache_state = 1;
+	}
+	else if(pre_cache_sum == 0 && cache_state == 1)
+	{
+		cache_state = 0;
+	}
 }
 
 function add_data_to_cache(result)
 {
+	if(result == null)
+		return;
 	let temp_date = new Date(result.lastVisitTime);
-	if(now_date < temp_date)
+	if(now_date.getTime() <= temp_date.getTime())
 	{
+		same_times++;
 		return;
 	}
-	cache_sum++;
+	same_times = 0;
+	decideState();
+	let days = cache_state == 1 ? pre_cache_days : cache_days;
 	let domain = result.url.split('/')[2];
-	if( cache_days.length != 0 && is_same_day(now_date, temp_date))//不在同一天
+	if( days.length != 0 && is_same_day(now_date, temp_date))//不在同一天
 	{
 		
-		let day = cache_days[cache_days.length-1];
+		let day = days[days.length-1];
 		let item = day.data[day.data.length-1];
 		if(item.domain == domain)
 		{
@@ -83,7 +124,7 @@ function add_data_to_cache(result)
 		{
 			let ans_item = new History_item(domain);
 			ans_item.push(result);
-			cache_days[cache_days.length-1].add_data(ans_item);
+			days[days.length-1].add_data(ans_item);
 		}
 	}
 	else
@@ -94,18 +135,21 @@ function add_data_to_cache(result)
 		item.push(result);
 		day_block.add_data(item);
 	}
+	if(!cache_state)
+		cache_sum++;
+	else
+		pre_cache_sum++;
 	now_date = temp_date;
 }
 
 function get_history(callback)
 {
 	let end_time = now_date.getTime()-1;
-	console.log(now_date);
 	query = {
 		text: '',
 		startTime: 0,
 		endTime: end_time,
-		maxResults: MIN_CACHE_SIZE+1
+		maxResults: MIN_CACHE_SIZE
 	};
 	chrome.history.search(query, (results)=>{
 		if(results.length != 0)
@@ -114,18 +158,26 @@ function get_history(callback)
 			{
 				add_data_to_cache(result);
 			}
-			callback();
+			if(same_times < 50)
+				callback();
 		}
 	});
 }
 
 function load()
 {
-	if($("#history_panel").height() - $(window).scrollTop() - window.innerHeight < 300)
+	if($("#history_panel").height() - $(window).scrollTop() - window.innerHeight < 1200)
 	{
 		print_to_html();
 	}
-	if(cache_sum < MIN_CACHE_SIZE)
+	while(cache_sum < MIN_CACHE_SIZE && pre_cache_sum != 0)
+	{
+		cache_days.push(pre_cache_days[0]);
+		cache_sum += pre_cache_days[0].cacheSum();
+		pre_cache_sum -= pre_cache_days[0].cacheSum();
+		pre_cache_days.shift();                                        
+	}
+	if(pre_cache_sum < MAX_CACHE_SIZE)
 	{
 		is_searching = true;
 		get_history(load);
@@ -149,23 +201,77 @@ function init()
 function first_load()
 {
 	init();
-	let latest_history = chrome.extension.getBackgroundPage().latest_history;
-	for(let i = (latest_history.tail-1 +latest_history.limit) % latest_history.limit; i!=latest_history.head; i=(i - 1 + latest_history.limit) % latest_history.limit)	
-	{
-		add_data_to_cache(latest_history.list[i]);
-	}
-	print_to_html();
-	load();
+	chrome.runtime.sendMessage("history", (data)=>{
+		let latest_history=data;
+		for(let i = (latest_history.tail-1 +latest_history.limit) % latest_history.limit; i!=latest_history.head; i=(i - 1 + latest_history.limit) % latest_history.limit)	
+		{
+			add_data_to_cache(latest_history.list[i]);
+		}
+		print_to_html();
+		load();
+	});
+
 }
 
 document.addEventListener("DOMContentLoaded", first_load);
 
-window.addEventListener("scroll", ()=>{
+window.addEventListener("scroll", throttle(()=>{
 	if(!is_searching && loadable)
 	{
 		load();
 	}
-});
+},100));
+
+window.addEventListener('scroll', throttle(function(e){
+	let top_location = $(window).scrollTop() + 40;
+	let now_day = document.getElementById("active_day");
+	if(now_day == null)
+		return;
+	let now_div = now_day.parentElement;
+	if(top_location < getEleTop(now_day))
+	{
+		while(now_div.previousElementSibling != null)
+		{
+			now_div = now_div.previousElementSibling;
+			let day = now_div.firstElementChild;
+			if(top_location > getEleTop(day))
+			{
+				now_day.removeAttribute("id");
+				day.id = "active_day";
+				curDate = new Date(day.innerHTML);
+				showCld(curDate);
+				break;
+			}
+		}
+	}
+	else
+	{
+		while(now_div.nextElementSibling != null)
+		{
+			now_div = now_div.nextElementSibling;
+			let day = now_div.firstElementChild;
+			if(top_location < getEleTop(day))
+			{
+				day = now_div.previousElementSibling.firstElementChild;
+				if(day.innerHTML == now_day.innerHTML)break;
+				now_day.removeAttribute("id");
+				day.id = "active_day";
+				curDate = new Date(day.innerHTML);
+				showCld(curDate);
+				break;
+			}
+			else if(top_location > getEleTop(day) && now_div.nextElementSibling == null)
+			{
+				if(day.innerHTML == now_day.innerHTML)break;
+				now_day.removeAttribute("id");
+				day.id = "active_day";
+				curDate = new Date(day.innerHTML);
+				showCld(curDate);
+			}
+
+		}
+	}
+}, 100));
 
 // search
 function search_back(results)
@@ -174,14 +280,14 @@ function search_back(results)
 	init();
 	for(let result of results)
 	{
-		console.log(result);
 		add_data_to_cache(result);
 	}
 	print_to_html();
 	loadable = false;
 }
 
-document.getElementById("searchSubmit").addEventListener("click", (event)=>{
+function onSearch()
+{
 	let val = $("#searchInput").val();
 	if(val != "")
 	{
@@ -192,4 +298,37 @@ document.getElementById("searchSubmit").addEventListener("click", (event)=>{
 		now_date = new Date();
 		first_load();
 	}
+}
+
+document.getElementById("searchSubmit").addEventListener("click", (event)=>{
+	onSearch();
+});
+
+document.getElementById("searchInput").addEventListener("keydown", function(e){
+	if(e.key == "Enter")
+	{
+		onSearch();
+	}
+});
+
+document.getElementById("delete_one").addEventListener("click", (e)=>{
+	let items = document.getElementsByClassName('panel_item_delete');
+	if(items[0].style.display == 'none')
+	{
+		for(let item of items)
+		{
+			item.style.display = 'block';
+		}
+	}
+	else
+	{
+		for(let item of items)
+		{
+			item.style.display = 'none';
+		}
+	}
+});
+
+document.getElementById("delete_all").addEventListener("click", (e)=>{
+	chrome.history.deleteAll(()=>{first_load();});
 });

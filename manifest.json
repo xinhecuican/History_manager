@@ -1,5 +1,5 @@
 {
-	"manifest_version": 2,
+	"manifest_version": 3,
 	"name": "history manager",
 	"version": "0.1.0",
 	"description": "浏览器历史记录管理插件",
@@ -11,9 +11,9 @@
 	},
 	"background":
 	{
-		"scripts": ["background.js"]
+		"service_worker": "background.js"
 	},
-	"browser_action":
+	"action":
 	{
 		"default_icon": 
 		{
@@ -28,10 +28,11 @@
 	[
 		"storage",
 		"tabs",
-		"history",
-		"chrome://favicon/"
+		"history"
 	],
-	"content_security_policy":"script-src 'self'; object-src 'self'; img-src chrome://favicon;",
+	"host_permissions":[
+		"http://*.google.com/"
+	],
 	"chrome_url_overrides":
 	{
 		"history": "history.html"

@@ -38,6 +38,14 @@ html{
 	top: 300px;
 }
 
+/* 删除按钮 */
+#delete_panel
+{
+	position: sticky;
+	margin: 30px auto 30px 30px;
+	top: 350px;
+}
+
 /* 历史窗口 */
 
 #history_panel{
@@ -53,6 +61,10 @@ html{
 	border: 1px solid #eee;
 }
 
+.panel_item:hover{
+	background-color: #4687f170;
+}
+
 .panel_item_title{
 	white-space: nowrap;
 	overflow: hidden;
@@ -60,6 +72,7 @@ html{
 	padding: 0px 10px 0px 30px;
 	display: block;
 	background: no-repeat 10px 0px;
+	background-size: 16px 16px;
 }
 
 .panel_item_title a{
@@ -68,6 +81,45 @@ html{
 
 .panel_item_time{
 	float: right;
+}
+
+.panel_item_add{
+	float: right;
+}
+
+.panel_item_add:hover{
+	cursor: pointer;
+}
+
+.panel_item_add:not([src]) {
+  opacity:0; 
+}
+
+.panel_item_delete{
+	float: right;
+}
+
+@-webkit-keyframes rotate{ 
+	10% { 
+	  transform: rotate(15deg); 
+	} 
+	20% { 
+	  transform: rotate(-10deg); 
+	} 
+	30% { 
+	  transform: rotate(5deg); 
+	} 
+	40% { 
+	  transform: rotate(-5deg); 
+	} 
+	50%,100% { 
+	  transform: rotate(0deg); 
+	} 
+}
+
+.panel_item_delete:hover{
+	cursor: pointer;
+	animation: rotate 2.5s .15s linear infinite;
 }
 
 .panel_item_url{
