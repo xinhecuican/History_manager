@@ -43,7 +43,6 @@ function initCld()
 
 /*显示日历*/
 function showCld(date){
-	console.log(date);
 	$('#cldFrame').datepicker("setDate", date);
 }
 

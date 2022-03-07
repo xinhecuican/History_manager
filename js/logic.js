@@ -1,5 +1,4 @@
 
-var historyDiv = document.getElementById('history_panel');
 const kColors = ['#4688F1', '#E8453C', '#F9BB2D', '#3AA757'];
 var MIN_CACHE_SIZE = 100;
 var MAX_CACHE_SIZE = 500;
@@ -16,8 +15,6 @@ var cache_state = 0;
 var is_searching = false;
 var loadable = true;
 var history_panel = document.getElementById("history_panel");
-var post = document.getElementById("post");
-var aside = document.getElementById("aside");
 var same_times = 0;
 
 class History_item
@@ -158,8 +155,11 @@ function get_history(callback)
 			{
 				add_data_to_cache(result);
 			}
-			if(same_times < 50)
-				callback();
+			callback();
+		}
+		else
+		{
+			is_searching = false;
 		}
 	});
 }
@@ -177,7 +177,7 @@ function load()
 		pre_cache_sum -= pre_cache_days[0].cacheSum();
 		pre_cache_days.shift();                                        
 	}
-	if(pre_cache_sum < MAX_CACHE_SIZE)
+	if(pre_cache_sum < MAX_CACHE_SIZE && same_times < 50)
 	{
 		is_searching = true;
 		get_history(load);
@@ -192,7 +192,7 @@ function init()
 {
 	block_id = 0;
 	history_days = [];
-	historyDiv.innerHTML = '';
+	history_panel.innerHTML = '';
 	cache_days = [];
 	cache_sum = 0;
 	loadable = true;
@@ -299,36 +299,3 @@ function onSearch()
 		first_load();
 	}
 }
-
-document.getElementById("searchSubmit").addEventListener("click", (event)=>{
-	onSearch();
-});
-
-document.getElementById("searchInput").addEventListener("keydown", function(e){
-	if(e.key == "Enter")
-	{
-		onSearch();
-	}
-});
-
-document.getElementById("delete_one").addEventListener("click", (e)=>{
-	let items = document.getElementsByClassName('panel_item_delete');
-	if(items[0].style.display == 'none')
-	{
-		for(let item of items)
-		{
-			item.style.display = 'block';
-		}
-	}
-	else
-	{
-		for(let item of items)
-		{
-			item.style.display = 'none';
-		}
-	}
-});
-
-document.getElementById("delete_all").addEventListener("click", (e)=>{
-	chrome.history.deleteAll(()=>{first_load();});
-});

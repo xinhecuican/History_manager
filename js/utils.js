@@ -68,3 +68,56 @@ function getEleTop(ele){
    	}
 	return actualTop
 }
+
+function transformSpecialCharacter(str)
+{
+	let specialCharacterArray = [" ","<",">","&","\""];
+	let specialCharacterCode = ["&nbsp;","&lt;","&gt;","&amp;","&quot;"];
+	let newStr = "";
+	let strLength = str.length;
+	for(let i=0; i<strLength; i++)
+	{
+		let ch = str.substring(i, i+1);
+		let is_specical = false;
+		let loc = -1;
+		for(let k=0; k<specialCharacterArray.length; k++)
+		{
+			if(specialCharacterArray[k] == ch)
+			{
+				is_specical = true;
+				loc=  k;
+				break;
+			}
+		}
+		if(is_specical)
+		{
+			newStr += specialCharacterCode[loc];
+		}
+		else
+		{
+			newStr += ch;
+		}
+	}
+	return newStr;
+}
+
+function getItemInfo(item, show_url)
+{
+	let show_title = item.title;
+	if(!show_title)
+	{
+		show_title = "无标题";
+	}
+	if(show_title.length > 60)
+	{
+		show_title = show_title.substring(0, 60) + "...";
+	}
+	if(show_url.length > 42)
+	{
+		let url_length = show_url.length;
+		show_url = show_url.substring(0,35) + "..." + show_url.substring(url_length - 4,url_length);
+	}
+	show_url = transformSpecialCharacter(show_url);
+	show_title = transformSpecialCharacter(show_title);
+	return {"url": show_url, "title": show_title, "time": new Date(item.lastVisitTime)};
+}

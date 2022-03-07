@@ -1,38 +1,6 @@
 var latest_day = null;
-
-
-function transformSpecialCharacter(str)
-{
-	let specialCharacterArray = [" ","<",">","&","\""];
-	let specialCharacterCode = ["&nbsp;","&lt;","&gt;","&amp;","&quot;"];
-	let newStr = "";
-	let strLength = str.length;
-	for(let i=0; i<strLength; i++)
-	{
-		let ch = str.substring(i, i+1);
-		let is_specical = false;
-		let loc = -1;
-		for(let k=0; k<specialCharacterArray.length; k++)
-		{
-			if(specialCharacterArray[k] == ch)
-			{
-				is_specical = true;
-				loc=  k;
-				break;
-			}
-		}
-		if(is_specical)
-		{
-			newStr += specialCharacterCode[loc];
-		}
-		else
-		{
-			newStr += ch;
-		}
-	}
-	return newStr;
-}
-const observer = lozad(); // lazy loads elements with default selector as '.lozad'
+var aside = document.getElementById("aside");
+var post = document.getElementById("post");
 
 function create_day_div(day)
 {
@@ -55,34 +23,12 @@ function create_day_div(day)
 	return dic;
 }
 
-function getItemInfo(item, show_url)
-{
-	let show_title = item.title;
-	if(!show_title)
-	{
-		show_title = "无标题";
-	}
-	if(show_title.length > 60)
-	{
-		show_title = show_title.substring(0, 60) + "...";
-	}
-	if(show_url.length > 42)
-	{
-		let url_length = show_url.length;
-		show_url = show_url.substring(0,35) + "..." + show_url.substring(url_length - 4,url_length);
-	}
-	show_url = transformSpecialCharacter(show_url);
-	show_title = transformSpecialCharacter(show_title);
-	return {"url": show_url, "title": show_title, "time": new Date(item.lastVisitTime)};
-}
-
 function create_item_div(list, day, item)
 {
 	let div = document.createElement('div');
 	div.id = "b" + day.id.toString() + "i" + day.inhtml_sum.toString();
 	day.inhtml_sum++;
 	div.className = "panel_item";
-	div.setAttribute('data-id', item.id);
 	let info = getItemInfo(item.items[0], item.domain);
 	let inner_html = '';
 	inner_html += '<img class="panel_item_delete" src="../img/delete.png" width="16" height="16" style="display: none;"/>';
@@ -92,7 +38,7 @@ function create_item_div(list, day, item)
 		inner_html += '<img class="panel_item_add" height="16" width="16"/>';
 	inner_html += `
 						<span class="panel_item_time">${dateFormat("hh:mm:ss", info['time'])}</span>
-						<span class="panel_item_title lozad" id="${"text" + div.id}" style="background-image: url(http://www.google.com/s2/favicons?domain_url=${item.url});">
+						<span class="panel_item_title" id="${"text" + div.id}" style="background-image: url(http://www.google.com/s2/favicons?domain_url=${item.url});">
 						  <a title="${info['title']}" target="_blank" href="${item.url}">${info['title']}</a>
 						  <text class="panel_item_url">${info['url']}</text> 
 						  <div class="item_children" style="display: none;"></div>
@@ -171,3 +117,36 @@ function print_to_html()
 	cache_days.length = 0;
 	cache_sum = 0;
 }
+
+document.getElementById("searchSubmit").addEventListener("click", (event)=>{
+	onSearch();
+});
+
+document.getElementById("searchInput").addEventListener("keydown", function(e){
+	if(e.key == "Enter")
+	{
+		onSearch();
+	}
+});
+
+document.getElementById("delete_one").addEventListener("click", (e)=>{
+	let items = document.getElementsByClassName('panel_item_delete');
+	if(items[0].style.display == 'none')
+	{
+		for(let item of items)
+		{
+			item.style.display = 'block';
+		}
+	}
+	else
+	{
+		for(let item of items)
+		{
+			item.style.display = 'none';
+		}
+	}
+});
+
+document.getElementById("delete_all").addEventListener("click", (e)=>{
+	chrome.history.deleteAll(()=>{first_load();});
+});

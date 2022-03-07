@@ -47,10 +47,12 @@ html{
 }
 
 /* 历史窗口 */
+#main_search{
+	margin-right: 20%;
+}
 
 #history_panel{
 	font-size: 14px;
-	margin-right: 20%;
 }
 
 .panel_item{
