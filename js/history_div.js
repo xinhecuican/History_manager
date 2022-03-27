@@ -1,6 +1,20 @@
 var latest_day = null;
 var aside = document.getElementById("aside");
 var post = document.getElementById("post");
+var context_target = null;
+var type_search = false;
+
+function search_day(id)
+{
+	for(let day of history_days)
+	{
+		if(day.id == id)
+		{
+			return day;
+		}
+	}
+	return null;
+}
 
 function create_day_div(day)
 {
@@ -118,16 +132,29 @@ function print_to_html()
 	cache_sum = 0;
 }
 
-document.getElementById("searchSubmit").addEventListener("click", (event)=>{
-	onSearch();
-});
-
 document.getElementById("searchInput").addEventListener("keydown", function(e){
 	if(e.key == "Enter")
 	{
 		onSearch();
 	}
 });
+
+function onSearch()
+{
+	let val = $("#searchInput").val();
+	if(val != "")
+	{
+		chrome.history.search({text: val, startTime:0, maxResults: 1500}, search_back);
+		type_search = true;
+	}
+	else
+	{
+		now_date = new Date();
+		first_load();
+		type_search = false;
+	}
+	window.scrollTo(0, 0);
+}
 
 document.getElementById("delete_one").addEventListener("click", (e)=>{
 	let items = document.getElementsByClassName('panel_item_delete');
@@ -149,4 +176,96 @@ document.getElementById("delete_one").addEventListener("click", (e)=>{
 
 document.getElementById("delete_all").addEventListener("click", (e)=>{
 	chrome.history.deleteAll(()=>{first_load();});
+});
+
+var scrollAction = {x: 'undefined', y: 'undefined'}, scrollDirection;
+  
+//判断页面滚动方向
+function scrollFunc() {
+    if (typeof scrollAction.x == 'undefined') {
+      scrollAction.x = window.pageXOffset;
+      scrollAction.y = window.pageYOffset;
+    }
+    let diffX = scrollAction.x - window.pageXOffset;
+    let diffY = scrollAction.y - window.pageYOffset;
+    if (diffX < 0) {
+    // Scroll right
+      scrollDirection = 'right';
+    } else if (diffX > 0) {
+    // Scroll left
+      scrollDirection = 'left';
+    } else if (diffY < 0) {
+    // Scroll down
+      scrollDirection = 'down';
+    } else if (diffY > 0) {
+    // Scroll up
+      scrollDirection = 'up';
+    } else {
+    // First scroll event
+    }
+    scrollAction.x = window.pageXOffset;
+    scrollAction.y = window.pageYOffset;
+}
+
+window.addEventListener("scroll", throttle((e)=>{
+	let nav = document.getElementById("navbar");
+	if($(window).scrollTop() < 1)
+	{
+		nav.style.boxShadow = "";
+	}
+	else
+	{
+		nav.style.boxShadow = "0 7px 5px -5px #333";
+	}
+},100));
+
+document.addEventListener("contextmenu", (e)=>{
+	context_target = e.target;
+});
+
+chrome.runtime.onMessage.addListener((message, sender, callback)=>{
+	if(message == "context_menu")
+	{
+		if(context_target == null){return;}
+		let item = context_target.parentNode.parentNode;
+		let day = item.parentNode.parentNode;
+		console.log(item.id)
+		let pattern = /b(.*)i(.*)/;
+		let day_data = search_day(parseInt(day.id.substring(1)));
+		let item_data = day_data.data[item.id.split(pattern)[2]];
+		let date = day_data.date;
+		now_date = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23 ,59 ,59, 0);
+		init();
+		showCld(now_date)
+		load(()=>{
+			if(!type_search)
+			{
+				let new_item = $(`#b0${item.id.substring(2)}`)[0];
+				if(new_item != null)
+				{
+					new_item.scrollIntoView()
+				}
+			}
+			else
+			{
+				for(let item of history_days[0].data)
+				{
+					for(let ele of item.items)
+					{
+						if(ele.id == item_data.items[0].id)
+						{
+							let new_item = $(`#b0i${item.id}`)[0];
+							if(new_item != null)
+							{
+								new_item.scrollIntoView();
+							}
+							break;
+						}
+					}
+				}
+				type_search = false;
+			}
+		}, now_date);
+	}
+	callback()
 });

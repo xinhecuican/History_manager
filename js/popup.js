@@ -82,7 +82,7 @@ function print_to_html()
 			{
 				history_days[history_days.length-1].add_data(data);
 			}
-			create_list_items_div(latest_day.children[1], history_days[history_days.length-1], cache_days[0].data);
+			create_list_items_div(latest_day.children[0], history_days[history_days.length-1], cache_days[0].data);
 			cache_days.shift();
 		}
 	}

@@ -35,6 +35,7 @@ function initCld()
 		onSelect: function(dateText, inst){
 			now_date = new Date(dateText);
 			now_date.setDate(now_date.getDate() + 1);
+			console.log(now_date);
 			init();
 			load();
 		}

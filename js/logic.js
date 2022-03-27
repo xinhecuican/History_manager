@@ -139,7 +139,7 @@ function add_data_to_cache(result)
 	now_date = temp_date;
 }
 
-function get_history(callback)
+function get_history(callback, donefunc=null, begin_date=null)
 {
 	let end_time = now_date.getTime()-1;
 	query = {
@@ -153,20 +153,26 @@ function get_history(callback)
 		{
 			for(let result of results)
 			{
+				// console.log(result.title, result.visitCount, result.typedCount);
 				add_data_to_cache(result);
 			}
-			callback();
+			callback(donefunc, begin_date);
 		}
 		else
 		{
+			if(donefunc != null)
+			{
+				donefunc();
+			}
 			is_searching = false;
 		}
 	});
 }
 
-function load()
+function load(donefunc=null, begin_date=null)
 {
-	if($("#history_panel").height() - $(window).scrollTop() - window.innerHeight < 1200)
+	if($("#history_panel").height() - $(window).scrollTop() - window.innerHeight < 1200
+	||(begin_date != null && begin_date.getDay() == now_date.getDay()))
 	{
 		print_to_html();
 	}
@@ -180,10 +186,14 @@ function load()
 	if(pre_cache_sum < MAX_CACHE_SIZE && same_times < 50)
 	{
 		is_searching = true;
-		get_history(load);
+		get_history(load, donefunc, begin_date);
 	}
 	else
 	{
+		if(donefunc != null)
+		{
+			donefunc();
+		}
 		is_searching = false;
 	}
 }
@@ -195,6 +205,10 @@ function init()
 	history_panel.innerHTML = '';
 	cache_days = [];
 	cache_sum = 0;
+	pre_cache_days = [];
+	pre_cache_sum = 0;
+	cache_state = 0;
+	same_times = 0;
 	loadable = true;
 }
 
@@ -202,10 +216,13 @@ function first_load()
 {
 	init();
 	chrome.runtime.sendMessage("history", (data)=>{
-		let latest_history=data;
-		for(let i = (latest_history.tail-1 +latest_history.limit) % latest_history.limit; i!=latest_history.head; i=(i - 1 + latest_history.limit) % latest_history.limit)	
+		if(data != null)
 		{
-			add_data_to_cache(latest_history.list[i]);
+			let latest_history=data;
+			for(let i = (latest_history.tail-1 +latest_history.limit) % latest_history.limit; i!=latest_history.head; i=(i - 1 + latest_history.limit) % latest_history.limit)	
+			{
+				add_data_to_cache(latest_history.list[i]);
+			}
 		}
 		print_to_html();
 		load();
@@ -284,18 +301,4 @@ function search_back(results)
 	}
 	print_to_html();
 	loadable = false;
-}
-
-function onSearch()
-{
-	let val = $("#searchInput").val();
-	if(val != "")
-	{
-		chrome.history.search({text: val, startTime:0, maxResults: 1500}, search_back);
-	}
-	else
-	{
-		now_date = new Date();
-		first_load();
-	}
 }

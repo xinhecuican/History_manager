@@ -178,3 +178,33 @@ chrome.runtime.onMessage.addListener((message, sender, callback)=>{
 		callback(latest_history);
 	}
 });
+
+chrome.runtime.onInstalled.addListener(function() {
+	chrome.contextMenus.create(
+	{ 
+		id: "history_manager_context_menu",
+		title: "查找当天历史",
+		documentUrlPatterns: ["chrome-extension://jknaabndcfakbnnpcckffmoimpoagffo/history.html"],
+		contexts: ['link']
+	});
+});
+
+chrome.contextMenus.onClicked.addListener(function(info, tab){
+	if(info.menuItemId == "history_manager_context_menu")
+	{
+		chrome.runtime.sendMessage("context_menu", ()=>{});
+	}
+})
+
+// chrome.tabs.onActivated.addListener((activeInfo)=>{
+// 	chrome.tabs.get(activeInfo.tabId, (tab)=>{
+// 		if(tab.pendingUrl == "chrome://history/" || tab.url == "chrome://history/")
+// 		{
+// 			chrome.contextMenus.update("history_manager_context_menu", {visible: true})
+// 		}
+// 		else
+// 		{
+// 			chrome.contextMenus.update("history_manager_context_menu", {visible: false})
+// 		}
+// 	})
+// })

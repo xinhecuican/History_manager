@@ -10,49 +10,21 @@ html{
 	height: 100%;
 }
 
-#aside {
-  	float: left;
-  	width: 25%;
-	height: 100%;
-}
-
-#post
-{
-	float: left;
-	width: 75%;
-}
-
-/* 日历样式 */
-
-#cldFrame{
-	position: sticky;
-	top: 30px;
-    margin: 50px auto 30px  30px;
-}
-
-/* 搜索框 */
-#search_panel
-{
-	position: sticky;
-	margin: 30px auto 30px 30px;
-	top: 300px;
-}
-
-/* 删除按钮 */
-#delete_panel
-{
-	position: sticky;
-	margin: 30px auto 30px 30px;
-	top: 350px;
-}
-
 /* 历史窗口 */
+
 #main_search{
 	margin-right: 20%;
 }
 
 #history_panel{
 	font-size: 14px;
+}
+
+.panel_day > h3{
+	font-size: 18px;
+	font-style: italic;
+	font-family: 'Microsoft Yahei', 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+	padding-bottom: 5px;
 }
 
 .panel_item{
@@ -130,4 +102,16 @@ html{
 
 .item_image{
 	float: left;
+}
+
+/* sidebar */
+#sidebar{
+	position: fixed;
+	bottom: 15px;
+	right: 15px;
+}
+
+#up_arrow{
+	width: 36px;
+	height: 36px;
 }

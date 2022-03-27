@@ -3,6 +3,12 @@
 }
 
 /* popup */
+.panel_day{
+	border-bottom: 1px solid #e9e9e9;
+	border-top: 1px solid #f9f9f9;
+	margin-bottom: 20px;
+	border-radius: 8px;
+}
 
 #pop_head{
 	position: fixed;

@@ -121,3 +121,22 @@ function getItemInfo(item, show_url)
 	show_title = transformSpecialCharacter(show_title);
 	return {"url": show_url, "title": show_title, "time": new Date(item.lastVisitTime)};
 }
+
+function animateScroll(element,speed) {
+    let rect=element.getBoundingClientRect();
+    //获取元素相对窗口的top值，此处应加上窗口本身的偏移
+    let top=window.pageYOffset+rect.top;
+    let currentTop=0;
+    let requestId;
+    //采用requestAnimationFrame，平滑动画
+    function step(timestamp) {
+      currentTop+=speed;
+      if(currentTop<=top){
+        window.scrollTo(0,currentTop);
+        requestId=window.requestAnimationFrame(step);
+      }else{
+        window.cancelAnimationFrame(requestId);
+      }
+    }
+    window.requestAnimationFrame(step);
+}

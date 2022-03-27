@@ -28,10 +28,8 @@
 	[
 		"storage",
 		"tabs",
-		"history"
-	],
-	"host_permissions":[
-		"http://*.google.com/"
+		"history",
+		"contextMenus"
 	],
 	"chrome_url_overrides":
 	{

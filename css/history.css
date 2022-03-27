@@ -1,0 +1,181 @@
+
+#root{
+	display: flex;
+}
+
+#navbar{
+	display: flex;
+	position: fixed;
+	background-color: white;
+	top: 0px;
+	height: 50px;
+	width: 100%;
+}
+
+.container-fluid{
+	width: 25%;
+	padding-left: 10px;
+}
+
+#post
+{
+	width: 75%;
+	margin-top: 60px;
+}
+
+#aside {
+	display: flex;
+	flex-direction: column;
+  	width: 25%;
+	height: 100%;
+}
+
+#aside_wrap{
+	position: sticky;
+	top: 0px;
+}
+
+#spacer{
+	flex: 1;
+}
+
+
+/* 日历样式 */
+
+#cldFrame{
+    margin: 60px auto 30px  30px;
+}
+
+/* 搜索框 */
+#search_panel
+{
+	margin: 15px auto 10px 80px;
+	width: 75%;
+}
+
+#search_icon{
+	display: inline;
+	width: 20px;
+	height: 20px;
+	vertical-align: middle;
+}
+
+#searchInput{
+	display: inline;
+	font-size: 15px;
+	width: 60%;
+	border-radius: 42px;
+    border: 2px solid #324B4E;
+    background: #f9f0da60;
+    transition: .3s linear;
+}
+
+#searchInput:focus {
+    width: 62%;
+}
+#search_icon {
+    background: none;
+    top: -2px;
+    right: 0;
+}
+#search_icon:before{
+    content: "\f002";
+    font-family: FontAwesome;
+    color: #324b4e;
+}
+
+/* 删除按钮 */
+#delete_panel
+{
+	margin: 15px auto 10px 30px;
+	width: 20%;
+}
+
+.panel_day{
+	border-bottom: 1px solid #e9e9e9;
+	border-top: 1px solid #f9f9f9;
+	box-shadow: 0 2px 5px 1px rgb(64 60 67 / 16%);
+	padding-left: 20px;
+	padding-right: 20px;
+	margin-bottom: 20px;
+	padding-bottom: 10px;
+	border-radius: 8px;
+}
+
+/* button style */
+
+/* General Buttons */
+.button {
+  width: 90px;
+  height: 30px;
+  background: linear-gradient(to bottom, #4eb5e5 0%,#389ed5 100%); /* W3C */
+  border: none;
+  border-radius: 5px;
+  position: relative;
+  border-bottom: 4px solid #2b8bc6;
+  color: #fbfbfb;
+  font-weight: 600;
+  font-family: 'Open Sans', sans-serif;
+  text-shadow: 1px 1px 1px rgba(0,0,0,.4);
+  font-size: 15px;
+  text-align: center;
+  text-indent: 5px;
+  box-shadow: 0px 3px 0px 0px rgba(0,0,0,.2);
+  cursor: pointer;
+
+/* Just for presentation */  
+}
+.button:active {
+  box-shadow: 0px 2px 0px 0px rgba(0,0,0,.2);
+  top: 1px;
+}
+
+.button:after {
+  content: "";
+  width: 0;
+  height: 0;
+  display: block;
+  border-top: 20px solid #187dbc;
+  border-bottom: 20px solid #187dbc;
+  border-left: 16px solid transparent;
+  border-right: 20px solid #187dbc;
+  position: absolute;
+  opacity: 0.6; 
+  right: 0;
+  top: 0;
+  border-radius: 0 5px 5px 0;  
+}
+
+/* Button pointing left */
+
+.button.back {
+  text-align: right;
+  padding-right: 12px;
+  box-sizing: border-box;
+}
+.button.back:after {
+  content: "";
+  width: 0;
+  height: 0;
+  display: block;
+  border-top: 20px solid #187dbc;
+  border-bottom: 20px solid #187dbc;
+  border-right: 16px solid transparent;
+  border-left: 20px solid #187dbc;
+  position: absolute;
+  opacity: 0.6; 
+  left: 0;
+  top: 0;
+  border-radius: 5px 0 0 5px;    
+}
+
+/* Single buttons */
+
+.button.site {
+  width: 40px;
+  text-align: center;
+  text-indent: 0;
+}
+.button.site:after{
+  display: none;
+}
