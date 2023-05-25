@@ -19,6 +19,7 @@ var same_times = 0;
 
 class History_item
 {
+	
 	constructor(domain)
 	{
 		this.id = 0;
@@ -218,13 +219,16 @@ function first_load()
 	chrome.runtime.sendMessage("history", (data)=>{
 		if(data != null)
 		{
-			let latest_history=data;
+			let latest_history=data.history;
 			for(let i = (latest_history.tail-1 +latest_history.limit) % latest_history.limit; i!=latest_history.head; i=(i - 1 + latest_history.limit) % latest_history.limit)	
 			{
 				add_data_to_cache(latest_history.list[i]);
 			}
 		}
 		print_to_html();
+		if(data != null && data.loadTab){
+			printRecentCloseTabs(data.tabs)
+		}
 		load();
 	});
 

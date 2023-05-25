@@ -1,7 +1,7 @@
 {
 	"manifest_version": 3,
 	"name": "history manager",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "浏览器历史记录管理插件",
 	"icons":
 	{
@@ -29,7 +29,19 @@
 		"storage",
 		"tabs",
 		"history",
-		"contextMenus"
+		"contextMenus",
+		"favicon",
+		"sessions"
+	],
+	"web_accessible_resources": [
+		{
+		"resources": ["_favicon/*"],
+		"matches": ["<all_urls>"],
+		"extension_ids": ["*"]
+		}
+	],
+	"optional_host_permissions": [
+		"*://*/*"
 	],
 	"chrome_url_overrides":
 	{

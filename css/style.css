@@ -39,6 +39,18 @@ html{
 	background-color: #4687f170;
 }
 
+#recentTab{
+	box-shadow: 1px 1px 1px rgb(0 0 0 / 25%);
+	background: #FFB900;
+	padding: 8px;
+	border-radius: 8px;
+	border: 1px solid #eee;
+}
+
+#recentTab:hover{
+	background-color: #D83B0170;
+}
+
 .panel_item_title{
 	white-space: nowrap;
 	overflow: hidden;

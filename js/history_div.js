@@ -52,7 +52,7 @@ function create_item_div(list, day, item)
 		inner_html += '<img class="panel_item_add" height="16" width="16"/>';
 	inner_html += `
 						<span class="panel_item_time">${dateFormat("hh:mm:ss", info['time'])}</span>
-						<span class="panel_item_title" id="${"text" + div.id}" style="background-image: url(http://www.google.com/s2/favicons?domain_url=${item.url});">
+						<span class="panel_item_title" id="${"text" + div.id}" style="background-image: url(chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${item.url});">
 						  <a title="${info['title']}" target="_blank" href="${item.url}">${info['title']}</a>
 						  <text class="panel_item_url">${info['url']}</text> 
 						  <div class="item_children" style="display: none;"></div>
@@ -88,8 +88,8 @@ function create_item_div(list, day, item)
 		children_div.className = "panel_item";
 		inner_html =  `
 						<span class="panel_item_time">${dateFormat("hh:mm:ss", info['time'])}</span>
-						<span class="panel_item_title lozad" style="background-image: url(http://www.google.com/s2/favicons?domain_url=${item.url});">
-						  <a title="${info['title']}" target="_blank" href="${info['url']}">${info['title']}</a>
+						<span class="panel_item_title" style="background-image: url(chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${item.url});">
+						  <a title="${info['title']}" target="_blank" href="${data.url}">${info['title']}</a>
 						  <text class="panel_item_url">${info['url']}</text>
 						</span>
 					  `;
@@ -97,6 +97,51 @@ function create_item_div(list, day, item)
 		children.appendChild(children_div);
 	}
 	list.appendChild(div);
+}
+
+function createRecentTabDiv(list, day, tabs){
+	let div = document.createElement('div');
+	div.id = "recentTab";
+	let innerHTML = '<img class="panel_item_add" src="../img/add.png"/>';
+	innerHTML += 	`
+						<span class="panel_item_title" id="${"text" + div.id}">
+						  <a title="最近关闭的${tabs.length}个标签页" target="_blank">最近关闭的${tabs.length}个标签页</a>
+						  <div class="item_children" style="display: none;"></div>
+						</span>
+					`;
+	div.innerHTML = innerHTML
+	let children = div.lastElementChild.lastElementChild;
+	div.children[0].onclick = function(e){
+		if(children.style.display == "none")
+			children.style.display = "block";
+		else
+			children.style.display = "none";
+	};
+	let link = div.lastElementChild.firstElementChild
+	link.onclick = function(e){
+		chrome.tabs.query({}, (tabs)=>{
+			for(let tab of tabs){
+				chrome.tabs.remove(tab.id)
+			}
+		})
+		for(let tab of tabs){
+			chrome.tabs.create({'url': tab.url})
+			// window.open(tab.url, "_blank"); 
+		}
+	}
+	for(let data of tabs){
+		let children_div = document.createElement('div');
+		children_div.className = "panel_item";
+		innerHTML =  `
+						<span class="panel_item_title" style="background-image: url(chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${data.url});">
+						  <a title="${data.title}" target="_blank" href="${data.url}">${data.title}}</a>
+						  <text class="panel_item_url">${data.url}</text>
+						</span>
+					  `;
+		children_div.innerHTML = innerHTML;
+		children.appendChild(children_div);
+	}
+	list.insertBefore(div, list.firstElementChild)
 }
 
 function create_list_items_div(list, day, items)
@@ -130,6 +175,14 @@ function print_to_html()
 	aside.style.height = post.offsetHeight;
 	cache_days.length = 0;
 	cache_sum = 0;
+}
+
+function printRecentCloseTabs(tabs){
+	if(history_days.length != 0){
+		let searchDiv = `#b${history_days[0].id.toString()} .history_list`
+		let topDay = $(searchDiv)[0]
+		createRecentTabDiv(topDay, history_days[0], tabs)
+	}
 }
 
 document.getElementById("searchInput").addEventListener("keydown", function(e){

@@ -112,6 +112,10 @@ latest_history.set_limit(70);
 var loading_history_num = 0;
 var search_times = 0;
 
+var tabToUrl = {};
+var tabInfo = [];
+var tabs = {"time": 0, "tabs": []}
+
 function onSearch(results)
 {
 	for(let result of results)
@@ -175,7 +179,29 @@ chrome.history.onVisitRemoved.addListener((result)=>{
 chrome.runtime.onMessage.addListener((message, sender, callback)=>{
 	if(message == "history")
 	{
-		callback(latest_history);
+		let index = (latest_history.tail-1 +latest_history.limit) % latest_history.limit
+		let historyTime = BigInt(Math.floor(latest_history.list[index].lastVisitTime))
+		let tabTime = BigInt(tabs.time)
+		let tmp1 = historyTime
+		let tmp2 = tabTime
+		let historyMax = 0n
+		let tabMax = 0n
+		while(tmp1 != 0 || tmp2 != 0){
+			if(tmp1 != 0){
+				historyMax = historyMax + 1n
+				tmp1 = tmp1 / 10n
+			}
+			if(tmp2 != 0){
+				tabMax = tabMax + 1n
+				tmp2 = tmp2 / 10n
+			}
+		}
+		let redress = (10n ** (historyMax - tabMax))
+		let historyLimitTime = historyTime / redress
+		let loadTab = tabTime > historyLimitTime
+
+		
+		callback({"history": latest_history, "loadTab": loadTab && tabs.tabs.length != 0, "tabs": tabs.tabs});
 	}
 });
 
@@ -208,3 +234,49 @@ chrome.contextMenus.onClicked.addListener(function(info, tab){
 // 		}
 // 	})
 // })
+
+
+
+
+chrome.windows.onCreated.addListener(function(windowId){
+	chrome.sessions.getRecentlyClosed((sessions)=>{
+		console.log(sessions)
+		for(let session of sessions){
+			if(session.window != undefined){
+				tabs = {"time": session.lastModified, "tabs": session.window.tabs}
+				console.log(tabs)
+				break
+			}
+		}
+	})
+	// chrome.storage.local.get("history_tab_data", function(result){
+	// 	tabs = result['history_tab_data'];
+	// })
+})
+
+// chrome.windows.onRemoved.addListener(function(windowId){
+// 	console.log(tabInfo);
+// 	ans = []
+// 	for(let info of tabInfo){
+// 		if(info != undefined){
+// 			ans.push(info)
+// 		}
+// 	}
+// 	tabs = {"time": new Date().getTime(), "tabs": ans}
+// 	chrome.storage.local.set({"history_tab_data": tabs})
+// 	tabInfo = []
+// })
+
+
+
+
+// chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+//     tabToUrl[tabId] = {"url": tab.url, "title": tab.title};
+// });
+
+// chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
+// 	if(removeInfo.isWindowClosing){
+// 		tabInfo.push(tabToUrl[tabId])
+// 	}
+// 	delete tabToUrl[tabId]
+// });

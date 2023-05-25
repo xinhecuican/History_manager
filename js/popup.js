@@ -72,6 +72,30 @@ function create_list_items_div(list, day, items)
 	}
 }
 
+function createRecentTabDiv(list, day, tabs){
+	let div = document.createElement('div');
+	div.id = "recentTab";
+	innerHTML = `<a title="最近关闭的${tabs.length}个标签页" target="_blank">
+						<span class="panel_item_pop_title" id="${"text" + div.id}">
+						  最近关闭的${tabs.length}个标签页
+						</span>
+					</a>`
+	div.innerHTML = innerHTML
+	let link = div.firstElementChild
+	link.onclick = function(e){
+		chrome.tabs.query({}, (tabs)=>{
+			for(let tab of tabs){
+				chrome.tabs.remove(tab.id)
+			}
+		})
+		for(let tab of tabs){
+			chrome.tabs.create({'url': tab.url})
+			// window.open(tab.url, "_blank"); 
+		}
+	}
+	list.insertBefore(div, list.firstElementChild)
+}
+
 function print_to_html()
 {
 	if(cache_days.length != 0 && history_days.length != 0)
@@ -93,6 +117,14 @@ function print_to_html()
 	}
 	cache_days.length = 0;
 	cache_sum = 0;
+}
+
+function printRecentCloseTabs(tabs){
+	if(history_days.length != 0){
+		let searchDiv = `#b${history_days[0].id.toString()} .history_list`
+		let topDay = $(searchDiv)[0]
+		createRecentTabDiv(topDay, history_days[0], tabs)
+	}
 }
 
 function onClick(event) {
