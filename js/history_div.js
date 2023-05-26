@@ -37,6 +37,12 @@ function create_day_div(day)
 	return dic;
 }
 
+function faviconURL(u) {
+  const url = new URL(chrome.runtime.getURL('/_favicon/'));
+  url.searchParams.set('pageUrl', u); // this encodes the URL as well
+  return url.toString();
+}
+
 function create_item_div(list, day, item)
 {
 	let div = document.createElement('div');
@@ -52,7 +58,7 @@ function create_item_div(list, day, item)
 		inner_html += '<img class="panel_item_add" height="16" width="16"/>';
 	inner_html += `
 						<span class="panel_item_time">${dateFormat("hh:mm:ss", info['time'])}</span>
-						<span class="panel_item_title" id="${"text" + div.id}" style="background-image: url(chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${item.url});">
+						<span class="panel_item_title" id="${"text" + div.id}" style="background-image: url(${faviconURL(item.url)});">
 						  <a title="${info['title']}" target="_blank" href="${item.url}">${info['title']}</a>
 						  <text class="panel_item_url">${info['url']}</text> 
 						  <div class="item_children" style="display: none;"></div>

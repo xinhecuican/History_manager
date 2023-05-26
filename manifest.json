@@ -36,8 +36,7 @@
 	"web_accessible_resources": [
 		{
 		"resources": ["_favicon/*"],
-		"matches": ["<all_urls>"],
-		"extension_ids": ["*"]
+		"matches": ["<all_urls>"]
 		}
 	],
 	"optional_host_permissions": [

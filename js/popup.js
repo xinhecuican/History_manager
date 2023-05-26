@@ -32,6 +32,12 @@ function getDeltaTime(time)
 		return (parseInt(delta/(365 * 24 * 3600 * 1000))).toString() + "年前";
 }
 
+function faviconURL(u) {
+  const url = new URL(chrome.runtime.getURL('/_favicon/'));
+  url.searchParams.set('pageUrl', u); // this encodes the URL as well
+  return url.toString();
+}
+
 function create_item_div(list, day, item)
 {
 	let div = document.createElement('div');
@@ -44,7 +50,7 @@ function create_item_div(list, day, item)
 	inner_html += ``;
 	inner_html += `<a title="${info['title']}" href="${item.url}">
 						<span class="panel_item_pop_time">${time_str}</span>
-						<span class="panel_item_pop_title" id="${"text" + div.id}" style="background-image: url(http://www.google.com/s2/favicons?domain_url=${item.url});">
+						<span class="panel_item_pop_title" id="${"text" + div.id}" style="background-image: url(${faviconURL(item.url)});">
 						  ${info['title']}
 						</span>
 					</a>
